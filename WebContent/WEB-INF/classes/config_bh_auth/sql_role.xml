@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="role">
+	<typeAlias alias="TbRole" type="com.platform.base.model.TbRole"/>
+	
+	<!-- 角色的映射 -->
+	<resultMap class="TbRole" id="roleMap">
+		<result property="name" column="name"/>
+		<result property="id" column="id"/>
+		<result property="description" column="description"/>
+		<result property="code" column="code"/>
+		<result property="status" column="status"/>
+		<result property="menus" column="id" select="role.selectRoleMenus"/>
+	</resultMap>
+	
+	<insert id="addRole" parameterClass="TbRole">
+		INSERT INTO tb_role (role_name,role_desc,STATUS,role_code)	
+		VALUES	(#name#,#description#,#status#,#code#);
+	</insert>
+	
+	<insert id="combineRoleAndMenu">
+		INSERT INTO tb_role_menu (role_id, menu_id)
+		VALUES(#roleId#, #menuId#)
+	</insert>
+
+	<select id="queryAllRoles" parameterClass="TbRole" resultClass="TbRole">
+		SELECT id,
+		role_name as name,
+		role_desc as description,
+		STATUS as status,
+		role_code as code
+		FROM tb_role
+		LIMIT #rowStart#, #pageSize#;
+	</select>
+
+	<select id="queryRoleById" resultMap="roleMap">
+		SELECT id,
+		role_name as name,
+		role_desc as description,
+		STATUS as status,
+		role_code as code
+		FROM tb_role
+		where id=#id#
+	</select>
+
+	<select id="selectRoleCount" resultClass="int">
+		SELECT count(*) FROM tb_role
+	</select>
+	
+	<delete id="uncombineRoleAndMenu">
+		delete from tb_role_menu where role_id = #roleId#
+	</delete>
+	
+	<delete id="deleteRoleById">
+		delete from tb_role where id = #id#
+	</delete>
+	
+	<update id="updateRoleStatus" parameterClass="TbRole">
+		update tb_role set status=#status# where id = #id#
+	</update>
+	
+	<select id="selectRoleMenus" resultClass="int">
+		select menu_id
+		from tb_role_menu
+		where role_id=#id#
+	</select>
+</sqlMap> 

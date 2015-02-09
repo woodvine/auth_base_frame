@@ -1,0 +1,92 @@
+=================================================================================================================
+Version English
+Time:2015-01-07
+Auhtor:WoodWang
+Comment:
+0)make sure that files in pagination folder will not be intercepted by SpringDispatcher
+1)import css:pagination.css
+2)import js: pagination.js and jquery-1.8.3.js
+  two variable in this js,you must use in your query function
+  	_currentPage:the current page number that you see now
+  	_pageSize:total count that data will show in one page
+3)user in your jsp:after your table,please define a div with id "pageShow",namely <div id="pageShow"></div>
+  And after your query funciton , call pageShow(functionName,totalCount).
+  functionName : the name of your query funciton.
+  totalCount :the total count of this  
+  In your functionName,you must use var _currentPage and _pageSize as your query condition.
+  For example ,you can user pagination like this:
+	 function queryUsers(){
+			$.ajax({
+				type : 'POST',
+				url : path+'queryUsers', //通过url传递name参数
+				data : {
+						page:_currentPage,
+						pageSize:_pageSize
+				},
+				dataType : 'json',
+				success:function(data){
+					if(data.status){
+						//show data
+						showTable(data.result);
+						//initial page div 
+						pageShow("queryUsers",data.ext.total);
+					}else{
+						alert(data.description);
+					}
+				},
+				error:function(e){
+					alert("Net error ,try later.")
+				}
+			});
+		}
+		
+		function showTable(list){   
+		}
+==================================================================================================================
+
+使用说明
+时间：2015-01-07
+使用过程
+       依赖文件CSS和JS：pagination/pagination.css和pagination.js
+   0）确保分页文件不会被SpringMVC拦截
+   1）将文件夹pagination复制到您的WebContent目录中
+   2）在JSP页面引用分页文件：
+        <link rel="stylesheet" href="<%=basePath %>pagination/pagination.css" type="text/css" media="all" />
+		<script type='text/javascript' src="<%=basePath%>pagination/pagination.js"></script>
+   3）定义分页DIV，其id固定为pageShow,即：<div id="pageShow></div>
+   4）functionName，在该方法中您分页查询结果展示完成后，调用pageShow(functionName,totalCount)初始化分页DIV
+              同时以pagination.js中的_currentPage和_pageSize作为分页查询条件(当前页，每页显示记录总数)。
+          _currentPage(当前显示的第几页)
+          _pageSize(每页需要显示的记录总数)
+          
+            例如：function queryUsers(){
+			$.ajax({
+				type : 'POST',
+				url : path+'queryUsers', //通过url传递name参数
+				data : {
+						page:_currentPage,
+						pageSize:_pageSize
+				},
+				dataType : 'json',
+				success:function(data){
+					if(data.status){
+						showTable(data.result);
+						//调用分页插件，初始化分页Div
+						pageShow("queryUsers",data.ext.total);
+					}else{
+						alert(data.description);
+					}
+				},
+				error:function(e){
+					alert("Net error ,try later.")
+				}
+			});
+		}
+		
+		function showTable(list){   
+		}
+              原理：首先，在您的functionName方法完成数据展示后，调用pageShow初始化分页DIV
+                         其次，在分页按钮中点击事件会回调您的functionName方法完成分页查询并展示
+==================================================================================================================
+
+

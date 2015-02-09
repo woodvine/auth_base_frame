@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="menu">
+	<typeAlias alias="TbMenu" type="com.platform.base.model.TbMenu"/>
+	<resultMap class="TbMenu" id="menuMap">
+		<result property="id" column="id"/>
+		<result property="description" column="description"/>
+		<result property="name" column="name"/>
+		<result property="url"  column="url"/>
+		<result property="type"   column="type"/>
+		<result property="typeOrder" column="typeOrder"/>
+		<result property="parentId"  column="parentId" />
+	</resultMap>
+	
+	<!-- 查询某个用户的操作权限列表：根据用户的角色ID -->
+ 	<select id="selectMenuByRoleId" parameterClass="int" resultClass="TbMenu">
+ 		SELECT 	id, 
+			description , 
+			NAME as name, 
+			url, 
+			t_order as typeOrder, 
+			TYPE as type , 
+			parent_id as parentId
+			 
+			FROM tb_role_menu  AS a LEFT JOIN tb_menu AS b 
+ 			ON a.menu_id=b.id WHERE a.role_id=#roleId#
+ 			order by id
+ 	</select>
+	
+	<!-- 查询顶层菜单(一级菜单和二级菜单)：目前只支持两级菜单 -->
+	<select id="selectAllMenuIds" resultClass="TbMenu">
+		SELECT 	id, 
+			NAME as name, 
+			parent_id as parentId
+			 
+			FROM tb_menu 
+			order by parentId
+	</select>
+	
+	<!-- 查询顶层菜单(一级菜单和二级菜单)：目前只支持两级菜单 -->
+	<select id="selectAllMenus" resultMap="menuMap" parameterClass="TbMenu">
+		SELECT 	id, 
+			description , 
+			NAME as name, 
+			url, 
+			t_order as typeOrder, 
+			TYPE as type , 
+			parent_id as parentId
+			 
+			FROM tb_menu 
+		<!-- 	WHERE parent_id=0 OR parent_id IN(SELECT id FROM tb_menu WHERE parent_id=0) -->
+			order by parentId ,typeOrder
+	</select>
+	
+	<select id="selectMenuById" resultMap="menuMap" parameterClass="int" >
+		SELECT 	id, 
+			description , 
+			NAME as name, 
+			url, 
+			t_order as typeOrder, 
+			TYPE as type , 
+			parent_id as parentId
+			 
+			FROM tb_menu 
+			where id=#id#
+	</select>
+	
+	<select id="selectChildren" resultMap="menuMap" parameterClass="int" >
+		SELECT 	id, 
+			description , 
+			NAME as name, 
+			url, 
+			t_order as typeOrder, 
+			TYPE as type , 
+			parent_id as parentId
+			 
+			FROM tb_menu 
+			where parent_id=#parentId#
+	</select>
+	
+	<select id="selectMenuCount" resultClass="int" parameterClass="TbMenu" >
+		SELECT 	count(*)
+	    FROM tb_menu 
+		where 1=1
+		<isNotNull prepend="and" property="parentId">
+			parent_id=#parentId#
+		</isNotNull>
+		<isNotNull prepend="and" property="id">
+			id=#id#
+		</isNotNull>
+	</select>
+	
+	
+	<update id="updateMenu"  parameterClass="TbMenu" >
+		update tb_menu set id=#id#
+		<isNotNull prepend="," property="parentId">
+			parent_id=#parentId#
+		</isNotNull>
+		<isNotEmpty prepend="," property="name">
+			name=#name#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="description">
+			description=#description#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="description">
+			url=#url#
+		</isNotEmpty>
+		where id=#id#
+	</update>
+	
+	<insert id="addMenu" parameterClass="TbMenu" >
+		INSERT INTO tb_menu (description, NAME, url, t_order, TYPE, parent_id)
+		VALUES( #description#, #name#, #url#, #typeOrder#, #type#, #parentId#)
+	</insert>
+	
+	<delete id="deleteMenu" parameterClass="int" >
+		delete from tb_menu 
+		where id=#id# 
+	</delete>
+	
+	<delete id="deleteChildren" parameterClass="int" >
+		delete from tb_menu 
+		where parent_id=#id# 
+	</delete>
+	
+	<delete id="deleteMenuRole" parameterClass="int" >
+		delete from tb_role_menu
+		where menu_id=#id#
+	</delete>
+</sqlMap> 
